@@ -42,7 +42,7 @@ jobs:
               --rpc-url "$rpc" --chain-id "$chain_id" \
               --verifier blockscout --verifier-url "$api" \
               --constructor-args "$(cast abi-encode 'constructor(uint256)' "$cooldown")" \
-              --watch
+              --watch --retries 30 --delay 15 # Blockscout's queue can take a few minutes
             echo "::endgroup::"
           }
           verify testnet robinhood_testnet 46630 https://explorer.testnet.chain.robinhood.com/api/
