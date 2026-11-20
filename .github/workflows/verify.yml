@@ -1,10 +1,11 @@
-# Publishes the contract source on Blockscout whenever an address is added to web/src/deployments.json.
+# Checks the deployed boards and publishes their source on Blockscout
+# whenever an address is added to web/src/deployments.json.
 name: Verify contracts
 
 on:
   push:
     branches: [main]
-    paths: ['web/src/deployments.json']
+    paths: ['web/src/deployments.json', '.github/workflows/verify.yml']
   workflow_dispatch:
 
 jobs:
@@ -18,23 +19,31 @@ jobs:
         with:
           submodules: recursive
       - uses: foundry-rs/foundry-toolchain@v1
-      - name: Verify on Blockscout
+      - name: Check and verify on Blockscout
         run: |
+          set -euo pipefail
           verify() {
-            local network=$1 chain_id=$2 api=$3
+            local network=$1 rpc=$2 chain_id=$3 api=$4
             local address cooldown
             address=$(jq -r ".${network}.address // empty" ../web/src/deployments.json)
-            cooldown=$(jq -r ".${network}.cooldown // 30" ../web/src/deployments.json)
             if [ -z "$address" ]; then
               echo "${network}: no address yet, skipping"
               return 0
             fi
-            echo "Verifying the ${network} contract ${address} (cooldown ${cooldown}s)"
+            echo "::group::${network} ${address}"
+            if [ "$(cast code "$address" --rpc-url "$rpc")" = "0x" ]; then
+              echo "::error::No contract at ${address} on ${network}. Was it deployed to another network?"
+              return 1
+            fi
+            # The constructor argument has to match exactly, so read it from the contract itself.
+            cooldown=$(cast to-dec "$(cast call "$address" "cooldown()" --rpc-url "$rpc")")
+            echo "Board: $(cast call "$address" "WIDTH()(uint16)" --rpc-url "$rpc")x$(cast call "$address" "HEIGHT()(uint16)" --rpc-url "$rpc"), cooldown ${cooldown}s, pixels painted: $(cast call "$address" "totalPainted()(uint256)" --rpc-url "$rpc")"
             forge verify-contract "$address" src/PixelBoard.sol:PixelBoard \
-              --chain-id "$chain_id" \
+              --rpc-url "$rpc" --chain-id "$chain_id" \
               --verifier blockscout --verifier-url "$api" \
               --constructor-args "$(cast abi-encode 'constructor(uint256)' "$cooldown")" \
-              --watch || echo "::warning::Verifying the ${network} contract failed, see the log above."
+              --watch
+            echo "::endgroup::"
           }
-          verify testnet 46630 https://explorer.testnet.chain.robinhood.com/api/
-          verify mainnet 4663 https://robinhoodchain.blockscout.com/api/
+          verify testnet robinhood_testnet 46630 https://explorer.testnet.chain.robinhood.com/api/
+          verify mainnet robinhood 4663 https://robinhoodchain.blockscout.com/api/

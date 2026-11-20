@@ -1,4 +1,4 @@
 {
-  "testnet": { "address": "", "cooldown": 30 },
+  "testnet": { "address": "0x10fC2c8CCe2FFAceb619c3F1A1E38e253264B81B", "cooldown": 30 },
   "mainnet": { "address": "", "cooldown": 30 }
 }
