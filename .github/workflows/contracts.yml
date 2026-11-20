@@ -1,0 +1,29 @@
+# Runs the contract tests on every push that touches contracts/.
+name: Contracts
+
+on:
+  push:
+    paths: ['contracts/**', 'web/src/bytecode.ts', '.github/workflows/contracts.yml']
+  pull_request:
+    paths: ['contracts/**', 'web/src/bytecode.ts']
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: contracts
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          submodules: recursive
+      - uses: foundry-rs/foundry-toolchain@v1
+      - run: forge fmt --check
+      - run: forge test -vvv
+      - name: Deploy page uses the current bytecode
+        run: |
+          expected=$(forge inspect PixelBoard bytecode)
+          if ! grep -q "$expected" ../web/src/bytecode.ts; then
+            echo "::error file=web/src/bytecode.ts::Out of date. Regenerate it with: cd contracts && forge inspect PixelBoard bytecode"
+            exit 1
+          fi

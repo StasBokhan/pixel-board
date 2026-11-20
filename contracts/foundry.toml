@@ -1,0 +1,18 @@
+[profile.default]
+src = "src"
+out = "out"
+libs = ["lib"]
+solc_version = "0.8.28"
+evm_version = "cancun"
+optimizer = true
+optimizer_runs = 200
+
+[fuzz]
+runs = 1000
+
+# Short names for `--rpc-url`. Public endpoints are rate-limited:
+# fine for deploying and playing around, for a busy site use a provider (e.g. Alchemy).
+[rpc_endpoints]
+robinhood = "https://rpc.mainnet.chain.robinhood.com"
+robinhood_testnet = "https://rpc.testnet.chain.robinhood.com"
+local = "http://127.0.0.1:8545"

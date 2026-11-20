@@ -1,0 +1,17 @@
+# Node / Vite
+node_modules/
+web/dist/
+.env.local
+.env.*.local
+
+# Foundry
+contracts/out/
+contracts/cache/
+# Local and dry-run deploy logs (real-network logs are worth committing: they record what you deployed)
+contracts/broadcast/*/31337/
+contracts/broadcast/**/dry-run/
+
+# Never commit keys
+.env
+
+.DS_Store

@@ -1,0 +1,4 @@
+{
+  "testnet": { "address": "", "cooldown": 30 },
+  "mainnet": { "address": "", "cooldown": 30 }
+}

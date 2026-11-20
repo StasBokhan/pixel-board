@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Deploy a Pixel Board</title>
+    <meta name="description" content="Deploy the Pixel Board contract to Robinhood Chain from your wallet." />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 2 2' shape-rendering='crispEdges'%3E%3Crect width='1' height='1' fill='%23E8343A'/%3E%3Crect x='1' width='1' height='1' fill='%23FFD42A'/%3E%3Crect y='1' width='1' height='1' fill='%232335B8'/%3E%3Crect x='1' y='1' width='1' height='1' fill='%231B1D22'/%3E%3C/svg%3E"
+    />
+  </head>
+  <body>
+    <div class="page">
+      <header class="top">
+        <div class="title">
+          <h1>Deploy</h1>
+          <p class="lede">
+            Puts a new Pixel Board contract on Robinhood Chain, signed by your wallet. You do this once per network. After that
+            the board runs on its own: no owner, no admin keys.
+          </p>
+        </div>
+        <div class="top-actions">
+          <a class="back-link" href="./">Back to the board</a>
+          <button class="account-btn" id="account-btn" type="button" aria-haspopup="menu" aria-expanded="false">
+            Connect wallet
+          </button>
+        </div>
+      </header>
+
+      <main class="deploy">
+        <section>
+          <h2>Network</h2>
+          <div class="choices" id="networks" role="radiogroup" aria-label="Network"></div>
+          <p class="note" id="network-note"></p>
+        </section>
+
+        <section>
+          <h2><label for="cooldown">Cooldown</label></h2>
+          <div class="field">
+            <input id="cooldown" type="number" inputmode="numeric" min="0" max="604800" step="1" value="30" />
+            <span>seconds a wallet waits between two pixels. 0 means no wait. It can't be changed later.</span>
+          </div>
+        </section>
+
+        <section>
+          <h2>Wallet</h2>
+          <p class="note" id="wallet-info"></p>
+          <div class="action">
+            <button class="paint-btn" id="deploy-btn" type="button" disabled>Connect wallet</button>
+            <p class="status" id="status" role="status" aria-live="polite"></p>
+          </div>
+        </section>
+
+        <section class="result" id="result" hidden></section>
+
+        <section id="history-section" hidden>
+          <h2>Deployed from this browser</h2>
+          <ol class="history" id="history"></ol>
+        </section>
+      </main>
+    </div>
+
+    <div class="menu" id="menu" role="menu" hidden></div>
+
+    <script type="module" src="/src/deploy.ts"></script>
+  </body>
+</html>

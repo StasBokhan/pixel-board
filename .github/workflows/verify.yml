@@ -1,0 +1,40 @@
+# Publishes the contract source on Blockscout whenever an address is added to web/src/deployments.json.
+name: Verify contracts
+
+on:
+  push:
+    branches: [main]
+    paths: ['web/src/deployments.json']
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: contracts
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          submodules: recursive
+      - uses: foundry-rs/foundry-toolchain@v1
+      - name: Verify on Blockscout
+        run: |
+          verify() {
+            local network=$1 chain_id=$2 api=$3
+            local address cooldown
+            address=$(jq -r ".${network}.address // empty" ../web/src/deployments.json)
+            cooldown=$(jq -r ".${network}.cooldown // 30" ../web/src/deployments.json)
+            if [ -z "$address" ]; then
+              echo "${network}: no address yet, skipping"
+              return 0
+            fi
+            echo "Verifying the ${network} contract ${address} (cooldown ${cooldown}s)"
+            forge verify-contract "$address" src/PixelBoard.sol:PixelBoard \
+              --chain-id "$chain_id" \
+              --verifier blockscout --verifier-url "$api" \
+              --constructor-args "$(cast abi-encode 'constructor(uint256)' "$cooldown")" \
+              --watch || echo "::warning::Verifying the ${network} contract failed, see the log above."
+          }
+          verify testnet 46630 https://explorer.testnet.chain.robinhood.com/api/
+          verify mainnet 4663 https://robinhoodchain.blockscout.com/api/
